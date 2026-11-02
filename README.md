@@ -54,10 +54,17 @@ Weapon| Type
 
 Each boss features three combat phases.
 
-📸 Screenshots
+## 📸 Screenshots
 
-Gameplay screenshots coming soon.
+### 🎮 Gameplay
+![Gameplay](file_000000001af881f4851cd63d8a9ea2eb.png)
 
+### ⚔️ Dungeon Screenshots
+![Screenshot 1](<لقطة الشاشة 2026-11-02 141903.png>)
+
+![Screenshot 2](<لقطة الشاشة 2026-11-02 142130.png>)
+
+![Screenshot 3](<لقطة الشاشة 2026-11-02 142146.png>)
 🚀 Play Online
 
 Ready to enter the dungeon?
