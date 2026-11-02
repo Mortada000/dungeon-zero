@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DUNGEON ZERO</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- HUD الأساسي -->
+    <div id="hud">
+        <div class="hud-left">
+            <h1 class="game-title">DUNGEON ZERO</h1>
+            <div class="weapon-hud">
+                <div class="weapon-current">WEAPON:<br><span class="weapon-name" style="color: #00ffff;">IRON BLADE Lv.1</span></div>
+                <div class="weapon-list">
+                    <div class="weapon-item active" id="ui-weapon-0">[ 1 ] IRON BLADE Lv.1</div>
+                    <div class="weapon-item" id="ui-weapon-1">[ 2 ] ARCANE BOLT Lv.1</div>
+                    <div class="weapon-item" id="ui-weapon-2">[ 3 ] FROST NOVA Lv.1</div>
+                    <div class="weapon-item" id="ui-weapon-3">[ 4 ] BLOOD SCYTHE Lv.1</div>
+                </div>
+            </div>
+        </div>
+        <div class="hud-right">
+            <div class="stat">
+                <span class="label">ROOM:</span>
+                <span class="value room-value" style="color: #00ffff;">START</span>
+            </div>
+            <div class="stat">
+                <span class="label">LEVEL:</span>
+                <span class="value level-value">1</span>
+            </div>
+            <div class="stat xp-stat">
+                <span class="label">XP: <span class="xp-text">0 / 100</span></span>
+                <div class="xp-bar-bg">
+                    <div class="xp-bar-fill"></div>
+                </div>
+            </div>
+            <div class="stat">
+                <span class="label">GOLD:</span>
+                <span class="value gold-value" style="color: #ffd700;">0</span>
+            </div>
+            <div class="stat">
+                <span class="label">PERM GOLD:</span>
+                <span class="value perm-gold-value" style="color: #ffaa00;">0</span>
+            </div>
+            <div class="stat" style="display: flex; flex-direction: column; align-items: flex-start; gap: 6px;">
+                <span class="label" style="display: flex; justify-content: space-between; width: 100%;">
+                    HP: <span class="hp-text" style="color: #ff3366;">100 / 100</span>
+                </span>
+                <div style="width: 140px; height: 10px; background: rgba(0, 0, 0, 0.7); border: 1px solid #444; border-radius: 4px; overflow: hidden; box-shadow: inset 0 0 5px #000;">
+                    <div class="hp-bar-fill" style="width: 100%; height: 100%; background: #ff3366; transition: width 0.2s ease-out, background-color 0.2s ease-out;"></div>
+                </div>
+            </div>
+            <div class="stat relic-stat" style="display: flex; flex-direction: column; align-items: flex-start; gap: 6px; margin-top: 4px;">
+                <span class="label" style="font-size: 12px; color: #aaa; letter-spacing: 1px;">RELICS</span>
+                <div class="relic-list" id="relicListUI" style="display: flex; flex-wrap: wrap; gap: 6px; width: 140px; min-height: 24px;">
+                    <!-- سيتم إضافة البطاقات هنا من game.js -->
+                </div>
+            </div>
+            <div class="stat">
+                <span class="label">FLOOR:</span>
+                <span class="value floor-value">1 / 3</span>
+            </div>
+            
+        </div>
+    </div>
+    
+    <!-- واجهة الزعيم -->
+    <div id="bossUI" class="hidden">
+        <div class="boss-name" id="uiBossName">THE DUNGEON WARDEN</div>
+        <div class="boss-hp-bar">
+            <div class="boss-hp-fill" id="bossHpFill"></div>
+        </div>
+        <div class="boss-hp-text" id="bossHpText">1000 / 1000</div>
+    </div>
+
+
+    <!-- UI Overlays -->
+    <div id="gameOverScreen" class="overlay hidden">
+        <h1 class="death-text">YOU DIED</h1>
+        <div class="stats-grid">
+            <div class="stat-box"><div class="stat-box-label">FLOOR REACHED</div><div class="stat-box-value" id="go-floor">1</div></div>
+            <div class="stat-box"><div class="stat-box-label">PLAYER LEVEL</div><div class="stat-box-value" id="go-level">1</div></div>
+            <div class="stat-box"><div class="stat-box-label">GOLD COLLECTED</div><div class="stat-box-value" id="go-gold">0</div></div>
+            <div class="stat-box"><div class="stat-box-label">ENEMIES DEFEATED</div><div class="stat-box-value" id="go-kills">0</div></div>
+            <div class="stat-box"><div class="stat-box-label">DAMAGE DEALT</div><div class="stat-box-value" id="go-damage">0</div></div>
+            <div class="stat-box"><div class="stat-box-label">RUN TIME</div><div class="stat-box-value" id="go-time">00:00</div></div>
+            <div class="stat-box"><div class="stat-box-label">RELICS FOUND</div><div class="stat-box-value" id="go-relics">0</div></div>
+            <div class="stat-box"><div class="stat-box-label">BEST WEAPON</div><div class="stat-box-value" id="go-weapon">Lv. 1</div></div>
+        </div>
+        <p class="restart-text">PRESS R TO RESTART</p>
+    </div>
+
+    <div id="victoryScreen" class="overlay hidden">
+        <h1 class="victory-title">DUNGEON ZERO</h1>
+        <h2 class="victory-subtitle" id="victorySubtitleText">THE DUNGEON HAS BEEN CONQUERED</h2>
+        <div class="stats-grid">
+            <div class="stat-box"><div class="stat-box-label">FLOORS CLEARED</div><div class="stat-box-value" id="vic-floor">3 / 3</div></div>
+            <div class="stat-box"><div class="stat-box-label">PLAYER LEVEL</div><div class="stat-box-value" id="vic-level">1</div></div>
+            <div class="stat-box"><div class="stat-box-label">GOLD COLLECTED</div><div class="stat-box-value" id="vic-gold">0</div></div>
+            <div class="stat-box"><div class="stat-box-label">ENEMIES DEFEATED</div><div class="stat-box-value" id="vic-kills">0</div></div>
+            <div class="stat-box"><div class="stat-box-label">DAMAGE DEALT</div><div class="stat-box-value" id="vic-damage">0</div></div>
+            <div class="stat-box"><div class="stat-box-label">RUN TIME</div><div class="stat-box-value" id="vic-time">00:00</div></div>
+            <div class="stat-box"><div class="stat-box-label">RELICS FOUND</div><div class="stat-box-value" id="vic-relics">0</div></div>
+            <div class="stat-box"><div class="stat-box-label">BEST WEAPON</div><div class="stat-box-value" id="vic-weapon">Lv. 1</div></div>
+        </div>
+        <p class="restart-text" style="margin-top: 32px;">PRESS R TO START A NEW RUN</p>
+    </div>
+
+    <div id="floorTransitionScreen" class="overlay hidden">
+        <h1 class="victory-title" id="floorTitleText">FLOOR 1 CLEARED</h1>
+        <h2 class="victory-subtitle">GET READY FOR THE NEXT FLOOR</h2>
+        <p class="relic-continue">PRESS E TO CONTINUE</p>
+    </div>
+
+    <div id="levelUpScreen" class="overlay hidden">
+        <h1 class="levelup-title">LEVEL UP!</h1>
+        <p class="levelup-subtitle">Choose 1 Upgrade</p>
+        <div class="upgrade-cards">
+            <div class="card" id="upgrade-0">
+                <h2 class="card-title">TITLE</h2>
+                <p class="card-desc">Desc</p>
+                <div class="card-hotkey">[ 1 ]</div>
+            </div>
+            <div class="card" id="upgrade-1">
+                <h2 class="card-title">TITLE</h2>
+                <p class="card-desc">Desc</p>
+                <div class="card-hotkey">[ 2 ]</div>
+            </div>
+            <div class="card" id="upgrade-2">
+                <h2 class="card-title">TITLE</h2>
+                <p class="card-desc">Desc</p>
+                <div class="card-hotkey">[ 3 ]</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="shopScreen" class="overlay hidden">
+        <h1 class="shop-title">SHOP</h1>
+        <div class="shop-gold-display">RUN GOLD: <span id="shopGoldValue" style="color:#ffd700;">0</span></div>
+        <div class="shop-cards">
+            <div class="shop-card" id="shop-card-0">
+                <h2 class="shop-item-title" id="shop-title-0">ITEM</h2>
+                <p class="shop-item-desc" id="shop-desc-0">DESC</p>
+                <div class="shop-item-price" id="shop-price-0">0 GOLD</div>
+                <button class="shop-btn" id="shop-btn-0">BUY [ 1 ]</button>
+            </div>
+            <div class="shop-card" id="shop-card-1">
+                <h2 class="shop-item-title" id="shop-title-1">ITEM</h2>
+                <p class="shop-item-desc" id="shop-desc-1">DESC</p>
+                <div class="shop-item-price" id="shop-price-1">0 GOLD</div>
+                <button class="shop-btn" id="shop-btn-1">BUY [ 2 ]</button>
+            </div>
+            <div class="shop-card" id="shop-card-2">
+                <h2 class="shop-item-title" id="shop-title-2">ITEM</h2>
+                <p class="shop-item-desc" id="shop-desc-2">DESC</p>
+                <div class="shop-item-price" id="shop-price-2">0 GOLD</div>
+                <button class="shop-btn" id="shop-btn-2">BUY [ 3 ]</button>
+            </div>
+        </div>
+        <p class="shop-close-hint">Press ESC to close</p>
+    </div>
+
+    <div id="relicScreen" class="overlay hidden">
+        <h1 class="relic-acq-title">RELIC ACQUIRED</h1>
+        <div class="relic-acq-card">
+            <h2 id="relicName">NAME</h2>
+            <p id="relicDesc">DESC</p>
+        </div>
+        <p class="relic-continue">PRESS E TO CONTINUE</p>
+    </div>
+
+    <div id="skinsScreen" class="overlay hidden">
+        <h1 class="shop-title">CHARACTER SKINS</h1>
+        <div class="shop-gold-display" style="margin-bottom: 24px; color: #aaa;">PERM GOLD: <span id="skinsPermGoldValue" style="color:#ffaa00;">0</span></div>
+        <p class="levelup-subtitle">SELECT YOUR WARDROBE</p>
+        <div class="skins-grid" id="skinsCardsContainer">
+            <!-- Dynamically populated -->
+        </div>
+        <p class="shop-close-hint" style="margin-top: 32px;">Press ESC or K to close</p>
+    </div>
+
+    <div id="upgradesScreen" class="overlay hidden" style="background-color: rgba(15, 5, 10, 0.95); z-index: 55;">
+        <h1 class="shop-title" style="color: #ff3366; text-shadow: 0 0 20px rgba(255,51,102,0.4);">PERMANENT UPGRADES</h1>
+        <div class="shop-gold-display" style="margin-bottom: 24px; color: #aaa;">PERM GOLD: <span id="upgradesPermGoldValue" style="color:#ffaa00;">0</span></div>
+        <div class="skins-grid" id="upgradesContainer" style="max-width: 900px; padding: 20px;">
+            <!-- Dynamically populated -->
+        </div>
+        <p class="shop-close-hint" style="margin-top: 32px;">Press ESC or U to close</p>
+    </div>
+
+    <div id="achievementsScreen" class="overlay hidden" style="background-color: rgba(5, 5, 15, 0.95); z-index: 50;">
+        <h1 class="shop-title">ACHIEVEMENTS</h1>
+        <p class="levelup-subtitle">LIFETIME PROGRESSION</p>
+        <div class="skins-grid" id="achievementsContainer" style="max-height: 60vh; overflow-y: auto; padding: 20px;">
+            <!-- Dynamically populated -->
+        </div>
+        <p class="shop-close-hint" style="margin-top: 32px;">Press ESC or Y to close</p>
+    </div>
+
+        <!-- شاشة السجل (Run History) -->
+    <div id="runHistoryScreen" class="overlay hidden" style="background-color: rgba(5, 5, 10, 0.95); z-index: 60;">
+        <h1 class="shop-title" style="color: #00ffff; text-shadow: 0 0 20px rgba(0,255,255,0.4);">RUN HISTORY</h1>
+        <p class="levelup-subtitle">LAST 10 ATTEMPTS</p>
+        
+        <!-- الحاوية التي سيتم توليد البطاقات بداخلها -->
+        <div class="skins-grid" id="runHistoryContainer" style="max-height: 60vh; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; align-items: center; width: 100%;">
+            <!-- Dynamically populated from game.js -->
+        </div>
+        
+        <div style="display: flex; gap: 24px; justify-content: center; margin-top: 24px;">
+            <button class="shop-btn" id="historyBackBtn">BACK / ESC</button>
+            <button class="shop-btn" id="historyClearBtn" style="color: #ff3366; border-color: #ff3366;">CLEAR HISTORY</button>
+        </div>
+    </div>  
+
+    <div id="settingsScreen" class="overlay hidden">
+    <h1 class="shop-title">SETTINGS</h1>
+
+    <div class="shop-cards" style="flex-direction: row; justify-content: center; align-items: stretch; gap: 24px; margin-top: 24px; flex-wrap: wrap;">
+
+        <div class="shop-card" style="width: 320px; text-align: left; padding: 40px 32px;">
+            <h2 class="shop-item-title" style="text-align: center; margin-bottom: 32px;">AUDIO OPTIONS</h2>
+
+            <div style="margin-bottom: 24px;">
+                <label style="color: #aaa; margin-bottom: 12px; display: block; font-size: 14px; font-weight: bold; letter-spacing: 2px;">
+                    MASTER VOLUME
+                </label>
+
+                <input type="range" id="volumeSlider" min="0" max="100" value="60" class="styled-slider">
+            </div>
+
+            <button class="shop-btn" id="muteToggleSettingsBtn" style="margin-top: 16px;">
+                MUTE: OFF
+            </button>
+        </div>
+
+        <div class="shop-card" style="width: 320px; text-align: left; padding: 40px 32px;">
+            <h2 class="shop-item-title" style="text-align: center; margin-bottom: 32px;">
+                CONTROLS
+            </h2>
+
+            <div style="color: #ccc; font-size: 14px; font-weight: bold; letter-spacing: 1px; line-height: 2.2;">
+                <div><span style="color:#aaddff;">M</span> — Settings</div>
+                <div><span style="color:#bb88ff;">K</span> — Skins</div>
+                <div><span style="color:#ffd700;">Y</span> — Achievements</div>
+                <div><span style="color:#ff3366;">U</span> — Upgrades</div>
+                <div><span style="color:#ffffff;">ESC</span> — Close Menu</div>
+            </div>
+        </div>
+
+    </div>
+
+    <p class="shop-close-hint" style="margin-top: 32px;">
+        Press ESC or M to close
+    </p>
+</div>
+
+    <!-- إشعار الإنجاز الفوري -->
+    <div id="achievementToast" class="achievement-toast">
+        <div class="achiev-header">ACHIEVEMENT UNLOCKED</div>
+        <div class="achiev-name" id="toastName">NAME</div>
+        <div class="achiev-desc" id="toastDesc">DESC</div>
+        <div class="achiev-reward" id="toastReward" style="color: #ffd700; font-size: 12px; margin-top: 4px; font-weight: bold;">+0 PERM GOLD</div>
+    </div>
+
+    <div id="mainMenu" class="overlay">
+    <div class="main-menu-content">
+        <div class="main-menu-kicker">ENTER THE DUNGEON</div>
+        <h1 class="main-menu-title">DUNGEON ZERO</h1>
+        <div class="main-menu-line"></div>
+        <div class="main-menu-buttons">
+    <button class="main-menu-btn" id="startRunBtn">START RUN</button>
+    <button class="main-menu-btn" id="menuSkinsBtn">SKINS</button>
+    <button class="main-menu-btn" id="menuAchievementsBtn">ACHIEVEMENTS</button>
+    <button class="main-menu-btn" id="menuUpgradesBtn">UPGRADES</button>
+    <button class="main-menu-btn" id="menuRunHistoryBtn">RUN HISTORY</button> <!-- الزر الجديد -->
+    <button class="main-menu-btn" id="menuSettingsBtn">SETTINGS</button>
+</div>
+        <p class="main-menu-hint">PRESS ENTER TO START</p>
+    </div>
+</div>
+
+<div id="pauseMenu" class="overlay hidden">
+    <div class="pause-menu-content">
+        <div class="main-menu-kicker">GAME PAUSED</div>
+        <h1 class="pause-menu-title">DUNGEON ZERO</h1>
+        <div class="main-menu-line"></div>
+
+        <div class="pause-menu-buttons">
+            <button class="main-menu-btn" id="resumeBtn">RESUME</button>
+            <button class="main-menu-btn" id="pauseSkinsBtn">SKINS</button>
+            <button class="main-menu-btn" id="pauseUpgradesBtn">UPGRADES</button>
+            <button class="main-menu-btn" id="pauseRunHistoryBtn">RUN HISTORY</button> <!-- الزر الجديد -->
+            <button class="main-menu-btn" id="pauseSettingsBtn">SETTINGS</button>
+            <button class="main-menu-btn" id="quitToMenuBtn">QUIT TO MAIN MENU</button>
+        </div>
+
+        <p class="main-menu-hint">PRESS ESC TO RESUME</p>
+    </div>
+</div>
+
+    <canvas id="gameCanvas"></canvas>
+    
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

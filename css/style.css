@@ -1,0 +1,363 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body, html {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #050505;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #e0e0e0;
+    user-select: none;
+}
+
+#gameCanvas {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+}
+
+#hud {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 24px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    pointer-events: none;
+    z-index: 10;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+}
+
+.hud-left { display: flex; flex-direction: column; gap: 24px; }
+.game-title { font-size: 24px; font-weight: 800; letter-spacing: 4px; color: #ffffff; opacity: 0.9; }
+
+.weapon-hud { display: flex; flex-direction: column; gap: 12px; }
+.weapon-current { font-size: 12px; font-weight: 600; letter-spacing: 2px; color: #888; }
+.weapon-name { font-size: 18px; font-weight: 800; display: inline-block; margin-top: 4px; text-shadow: 0 0 10px rgba(0,0,0,0.8); transition: color 0.3s; }
+.weapon-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.weapon-item { font-size: 12px; font-weight: 600; color: #444; font-family: monospace; transition: all 0.2s; }
+.weapon-item.active { color: #fff; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
+
+.hud-right { display: flex; flex-direction: column; gap: 12px; align-items: flex-end; }
+.stat { display: flex; flex-direction: column; align-items: flex-end; }
+.stat .label { font-size: 12px; font-weight: 600; letter-spacing: 2px; color: #888; margin-bottom: 4px; }
+.stat .value { font-size: 18px; font-weight: 700; font-family: monospace; transition: color 0.2s; }
+.hp-value { color: #ff3366; }
+
+.xp-stat { width: 130px; }
+.xp-stat .label { display: flex; width: 100%; justify-content: space-between; margin-bottom: 6px; }
+.xp-text { color: #bb88ff; font-family: monospace; }
+.xp-bar-bg { width: 100%; height: 6px; background-color: #222; border-radius: 3px; overflow: hidden; }
+.xp-bar-fill { height: 100%; width: 0%; background-color: #bb88ff; box-shadow: 0 0 10px #bb88ff; transition: width 0.3s ease-out; }
+
+.relic-stat { width: 150px; }
+.relic-list { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+
+#bossUI {
+    position: absolute;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: none;
+    z-index: 15;
+    transition: opacity 0.5s;
+}
+.boss-name { font-size: 20px; font-weight: 900; letter-spacing: 6px; color: #ff1a1a; text-shadow: 0 0 10px #ff0000; margin-bottom: 12px; }
+.boss-hp-bar { width: 100%; height: 16px; background-color: #111; border: 2px solid #330000; border-radius: 8px; overflow: hidden; box-shadow: 0 0 15px rgba(255, 0, 0, 0.3); }
+.boss-hp-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #aa0000, #ff1a1a); transition: width 0.2s ease-out; }
+.boss-hp-text { font-size: 14px; font-family: monospace; font-weight: bold; color: #ffcccc; margin-top: 8px; }
+
+/* OVERLAYS */
+.overlay {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 1;
+    transition: opacity 0.3s ease-in-out;
+}
+.hidden { opacity: 0 !important; pointer-events: none; }
+
+#levelUpScreen { background-color: rgba(5, 5, 5, 0.9); z-index: 30; }
+#shopScreen { background-color: rgba(10, 8, 5, 0.95); z-index: 30; }
+#relicScreen { background-color: rgba(5, 5, 5, 0.95); z-index: 40; }
+#gameOverScreen { background-color: rgba(10, 0, 0, 0.95); z-index: 20; }
+#floorTransitionScreen, #victoryScreen { background-color: rgba(5, 10, 15, 0.95); z-index: 25; }
+#skinsScreen { background-color: rgba(10, 15, 20, 0.95); z-index: 45; }
+#settingsScreen { background-color: rgba(5, 10, 15, 0.95); z-index: 50; } 
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 32px;
+    margin-bottom: 32px;
+    max-width: 900px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+}
+.stat-box { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.stat-box-label { font-size: 12px; font-weight: bold; letter-spacing: 2px; color: #888; margin-bottom: 8px; }
+.stat-box-value { font-size: 24px; font-weight: 900; font-family: monospace; color: #fff; text-shadow: 0 0 8px rgba(255,255,255,0.5); }
+#go-gold, #vic-gold { color: #ffd700; text-shadow: 0 0 8px rgba(255,215,0,0.5); }
+#go-damage, #vic-damage { color: #ff3366; text-shadow: 0 0 8px rgba(255,51,102,0.5); }
+#go-weapon, #vic-weapon { color: #00ffff; text-shadow: 0 0 8px rgba(0,255,255,0.5); }
+
+.death-text { font-size: 64px; font-weight: 900; letter-spacing: 12px; color: #ff1a1a; text-shadow: 0 0 30px rgba(255, 26, 26, 0.8); margin-bottom: 32px; }
+.restart-text { font-size: 18px; letter-spacing: 4px; color: #aaaaaa; animation: pulse 1.5s infinite; }
+
+.victory-title { font-size: 64px; font-weight: 900; letter-spacing: 12px; color: #00ffff; text-shadow: 0 0 25px rgba(0, 255, 255, 0.6); margin-bottom: 16px; }
+.victory-subtitle { font-size: 20px; letter-spacing: 6px; color: #ffcccc; margin-bottom: 40px; text-shadow: 0 0 10px rgba(255, 0, 0, 0.5); }
+
+/* UI Cards */
+.levelup-title { font-size: 56px; font-weight: 900; letter-spacing: 10px; color: #bb88ff; text-shadow: 0 0 20px rgba(187, 136, 255, 0.5); margin-bottom: 8px; }
+.levelup-subtitle { font-size: 16px; letter-spacing: 4px; color: #aaaaaa; margin-bottom: 48px; }
+.upgrade-cards, .shop-cards { display: flex; gap: 24px; }
+.skins-grid { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; max-width: 1000px; }
+
+.card, .shop-card { background: #111; border: 2px solid #333; border-radius: 8px; padding: 32px 24px; width: 240px; text-align: center; cursor: pointer; position: relative; transition: all 0.2s; box-shadow: 0 8px 16px rgba(0,0,0,0.5); }
+.card:hover { border-color: #bb88ff; transform: translateY(-5px); box-shadow: 0 12px 24px rgba(187, 136, 255, 0.2); }
+.card-title, .shop-item-title { font-size: 20px; font-weight: 800; color: #ffffff; margin-bottom: 16px; letter-spacing: 2px; }
+.card-desc, .shop-item-desc { font-size: 14px; color: #cccccc; line-height: 1.5; margin-bottom: 24px; }
+.card-hotkey { font-size: 12px; color: #666; font-family: monospace; position: absolute; bottom: 16px; width: 100%; left: 0; }
+
+.shop-title { font-size: 56px; font-weight: 900; letter-spacing: 10px; color: #ffd700; text-shadow: 0 0 20px rgba(255, 215, 0, 0.4); margin-bottom: 12px; }
+.shop-gold-display { font-size: 20px; font-weight: bold; letter-spacing: 2px; margin-bottom: 48px; color: #aaaaaa; }
+.shop-card { background: #1a1510; border-color: #4a3a10; display: flex; flex-direction: column; align-items: center; }
+.shop-item-desc { flex-grow: 1; }
+.shop-item-price { font-size: 16px; font-weight: bold; margin-bottom: 16px; text-shadow: 0 0 5px currentColor;}
+.shop-btn { background: #332500; border: 1px solid #ffd700; color: #ffd700; padding: 10px 20px; font-size: 14px; font-weight: bold; cursor: pointer; border-radius: 4px; width: 100%; transition: all 0.2s; margin-top: auto; }
+.shop-btn:hover:not(:disabled) { background: #ffd700; color: #000; box-shadow: 0 0 15px rgba(255, 215, 0, 0.5); }
+.shop-btn:disabled { background: #222; border-color: #444; color: #777; cursor: not-allowed; box-shadow: none; }
+.shop-close-hint { margin-top: 48px; font-size: 14px; color: #888; letter-spacing: 2px; }
+
+.relic-acq-title { font-size: 48px; font-weight: 900; letter-spacing: 10px; color: #ffffff; text-shadow: 0 0 20px rgba(255, 255, 255, 0.5); margin-bottom: 32px; }
+.relic-acq-card { background: #111; border: 2px solid #555; border-radius: 8px; padding: 40px; text-align: center; box-shadow: 0 0 30px rgba(255, 255, 255, 0.1); margin-bottom: 48px; max-width: 400px;}
+#relicName { font-size: 28px; font-weight: 800; margin-bottom: 16px; letter-spacing: 3px; text-shadow: 0 0 10px currentColor; }
+#relicDesc { font-size: 16px; color: #cccccc; line-height: 1.6; }
+.relic-continue { font-size: 16px; letter-spacing: 4px; color: #aaaaaa; animation: pulse 1.5s infinite; }
+
+.styled-slider { -webkit-appearance: none; width: 100%; height: 8px; background: #222; outline: none; border-radius: 4px; border: 1px solid #444; }
+.styled-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; background: #aaddff; cursor: pointer; border-radius: 50%; box-shadow: 0 0 10px rgba(170, 221, 255, 0.5); }
+
+/* إشعار الإنجاز الفوري Toast */
+.achievement-toast {
+    position: fixed;
+    bottom: 24px;
+    right: -350px;
+    width: 320px;
+    background: rgba(10, 10, 15, 0.95);
+    border: 2px solid #ffd700;
+    border-left: 8px solid #ffd700;
+    border-radius: 6px;
+    padding: 16px 20px;
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.3);
+    transition: right 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 100;
+    pointer-events: none;
+}
+.achievement-toast.show {
+    right: 24px;
+}
+.achiev-header { color: #ffd700; font-size: 11px; font-weight: bold; letter-spacing: 2px; margin-bottom: 6px; }
+.achiev-name { color: #fff; font-size: 18px; font-weight: 900; letter-spacing: 1px; margin-bottom: 4px; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
+.achiev-desc { color: #aaa; font-size: 12px; }
+
+/* بطاقات الإنجازات داخل الشاشة */
+.achiev-unlocked { border-color: #ffd700 !important; box-shadow: 0 0 15px rgba(255,215,0,0.2); }
+.achiev-locked { filter: grayscale(80%); opacity: 0.8; }
+.achiev-locked:hover { filter: grayscale(0%); opacity: 1; }
+
+@keyframes pulse {
+    0% { opacity: 0.5; }
+    50% { opacity: 1; }
+    100% { opacity: 0.5; }
+}
+
+#muteToggleBtn.muted {
+    color: #ff3366 !important;
+    text-shadow: 0 0 10px #ff3366 !important;
+}
+
+/* Main Menu */
+#mainMenu {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+        radial-gradient(circle at center, rgba(20, 20, 35, 0.55), rgba(0, 0, 0, 0.92)),
+        rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(3px);
+}
+
+.main-menu-content {
+    width: min(520px, 90vw);
+    padding: 42px 32px;
+    text-align: center;
+    border: 1px solid rgba(0, 255, 255, 0.25);
+    border-radius: 12px;
+    background: rgba(8, 8, 16, 0.88);
+    box-shadow:
+        0 0 35px rgba(0, 255, 255, 0.08),
+        inset 0 0 30px rgba(0, 255, 255, 0.03);
+}
+
+.main-menu-kicker {
+    margin-bottom: 10px;
+    color: #777;
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 4px;
+}
+
+.main-menu-title {
+    margin: 0;
+    color: #00ffff;
+    font-size: clamp(42px, 8vw, 72px);
+    font-weight: 900;
+    letter-spacing: 6px;
+    text-shadow:
+        0 0 10px rgba(0, 255, 255, 0.7),
+        0 0 30px rgba(0, 255, 255, 0.3);
+}
+
+.main-menu-line {
+    width: 80px;
+    height: 2px;
+    margin: 22px auto 28px;
+    background: #00ffff;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+}
+
+.main-menu-btn {
+    width: 220px;
+    padding: 14px 20px;
+    border: 1px solid #00ffff;
+    border-radius: 6px;
+    background: rgba(0, 255, 255, 0.08);
+    color: #00ffff;
+    font-size: 16px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.main-menu-btn:hover {
+    background: rgba(0, 255, 255, 0.18);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.25);
+    transform: translateY(-2px);
+}
+
+.main-menu-hint {
+    margin: 18px 0 0;
+    color: #555;
+    font-size: 11px;
+    letter-spacing: 2px;
+}
+/* Main Menu Buttons */
+.main-menu-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.main-menu-buttons .main-menu-btn {
+    width: min(280px, 80vw);
+    padding: 13px 20px;
+    background: rgba(0, 255, 255, 0.035);
+    border-color: rgba(0, 255, 255, 0.35);
+    font-size: 14px;
+    letter-spacing: 2px;
+}
+
+.main-menu-buttons .main-menu-btn:first-child {
+    margin-bottom: 8px;
+    background: rgba(0, 255, 255, 0.10);
+    box-shadow: 0 0 18px rgba(0, 255, 255, 0.08);
+}
+
+.main-menu-buttons .main-menu-btn:not(:first-child) {
+    color: #aaa;
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.main-menu-buttons .main-menu-btn:not(:first-child):hover {
+    color: #00ffff;
+    border-color: rgba(0, 255, 255, 0.45);
+    background: rgba(0, 255, 255, 0.06);
+}
+
+#pauseMenu {
+    background:
+        radial-gradient(circle at center, rgba(15, 15, 30, 0.7), rgba(0, 0, 0, 0.94)),
+        rgba(0, 0, 0, 0.88);
+    backdrop-filter: blur(4px);
+}
+
+.pause-menu-content {
+    width: min(500px, 90vw);
+    padding: 38px 30px;
+    text-align: center;
+    border: 1px solid rgba(0, 255, 255, 0.22);
+    border-radius: 12px;
+    background: rgba(8, 8, 16, 0.92);
+    box-shadow:
+        0 0 35px rgba(0, 255, 255, 0.08),
+        inset 0 0 30px rgba(0, 255, 255, 0.03);
+}
+
+.pause-menu-title {
+    margin: 0;
+    color: #00ffff;
+    font-size: clamp(36px, 7vw, 60px);
+    font-weight: 900;
+    letter-spacing: 5px;
+    text-shadow:
+        0 0 10px rgba(0, 255, 255, 0.7),
+        0 0 30px rgba(0, 255, 255, 0.25);
+}
+
+.pause-menu-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.pause-menu-buttons .main-menu-btn {
+    width: min(280px, 80vw);
+}
+
+.pause-menu-buttons .main-menu-btn:last-child {
+    margin-top: 8px;
+    color: #ff6688;
+    border-color: rgba(255, 80, 120, 0.3);
+}
+
+.pause-menu-buttons .main-menu-btn:last-child:hover {
+    color: #ff3366;
+    border-color: rgba(255, 80, 120, 0.6);
+    background: rgba(255, 50, 100, 0.08);
+}
