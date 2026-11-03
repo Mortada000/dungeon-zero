@@ -71,7 +71,9 @@ Ready to enter the dungeon?
 
 👉 "PLAY DUNGEON ZERO" (https://mortada000.github.io/dungeon-zero/)
 
-No installation required.
+## 🖥️ Download for Windows
+
+[⬇️ Download DUNGEON ZERO v1.0.0](https://github.com/Mortada000/dungeon-zero/releases/latest).
 
 🛠️ Built With
 
